@@ -1,3 +1,4 @@
+import { SpinnerGap } from '@phosphor-icons/react'
 import axios from 'axios'
 import { useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
@@ -111,32 +112,10 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="flex h-10 w-full items-center justify-center rounded-[9999px] bg-primary text-[14px] font-bold text-white transition-colors hover:bg-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 disabled:bg-border disabled:text-text-secondary disabled:cursor-not-allowed"
+        className="flex h-10 w-full items-center justify-center gap-2 rounded-[9999px] bg-primary text-[14px] font-bold text-white transition-colors hover:bg-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 disabled:bg-border disabled:text-text-secondary disabled:cursor-not-allowed"
       >
-        {loading ? (
-          <svg
-            className="h-5 w-5 animate-spin"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-label="Memuat"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="3"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"
-            />
-          </svg>
-        ) : (
-          'Masuk ke Akun'
-        )}
+        {loading && <SpinnerGap className="animate-spin" weight="bold" />}
+        Masuk
       </button>
     </form>
   )

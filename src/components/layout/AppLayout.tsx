@@ -14,7 +14,7 @@ import {
 import { api } from '@/lib/api'
 
 const NAV_ITEMS = [
-  { to: '/', label: 'Dashboard', icon: SquaresFourIcon },
+  { to: '/dashboard', label: 'Dashboard', icon: SquaresFourIcon },
   { to: '/sales', label: 'Penjualan', icon: CreditCardIcon },
   { to: '/products', label: 'Produk', icon: PackageIcon },
   { to: '/categories', label: 'Kategori', icon: ListBulletsIcon },
@@ -82,8 +82,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <nav className="flex-1 overflow-y-auto px-3 py-3">
           <ul className="space-y-0.5">
             {NAV_ITEMS.map((item) => {
-              const active = item.to === '/'
-                ? currentPath === '/'
+              const active = item.to === '/dashboard'
+                ? currentPath === '/dashboard'
                 : currentPath.startsWith(item.to)
 
               return (
@@ -125,8 +125,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           {/* Page title from current route */}
           <h1 className="text-[14px] font-medium text-text-primary">
             {NAV_ITEMS.find((item) =>
-              item.to === '/'
-                ? currentPath === '/'
+              item.to === '/dashboard'
+                ? currentPath === '/dashboard'
                 : currentPath.startsWith(item.to),
             )?.label ?? 'Dashboard'}
           </h1>
@@ -146,14 +146,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </button>
 
             {userMenuOpen && (
-              <div className="absolute right-0 top-full mt-1 w-[160px] rounded-[8px] border border-border bg-surface py-1 shadow-level-2">
+              <div className="absolute right-0 top-full mt-1 w-40 rounded-lg border border-border bg-surface py-1 shadow-level-2">
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-[13px] text-text-secondary hover:bg-bg hover:text-text-primary"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-[13px] text-text-secondary hover:bg-bg hover:text-red-500"
                 >
                   <SignOutIcon size={16} />
-                  Keluar
+                  <span className='hover:text-red-500'>Keluar</span>
                 </button>
               </div>
             )}
