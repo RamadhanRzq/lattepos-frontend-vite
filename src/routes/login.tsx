@@ -5,8 +5,8 @@ export const Route = createFileRoute('/login')({ component: LoginPage })
 
 function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg px-4">
-      <div className="w-full max-w-100">
+    <div className="flex min-h-screen items-center justify-center bg-bg px-4 py-8">
+      <div className="w-full max-w-sm sm:max-w-100">
         <div className="mb-8 text-center">
           <Link to="/" className="inline-block">
             <h1 className="text-[28px] font-bold tracking-[-0.01em] text-text-primary">
@@ -15,7 +15,7 @@ function LoginPage() {
           </Link>
         </div>
 
-        <div className="rounded-xl border border-border bg-surface p-8 shadow-level-2">
+        <div className="rounded-xl border border-border bg-surface p-5 shadow-level-2 sm:p-8">
           <h2 className="mb-1 text-[22px] font-bold tracking-[-0.01em] text-text-primary">
             Masuk
           </h2>

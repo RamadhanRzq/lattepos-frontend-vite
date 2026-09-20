@@ -5,6 +5,10 @@ import {
   ArmchairIcon,
 } from '@phosphor-icons/react'
 import { KpiCard } from './KpiCard'
+import { RevenueChart } from './RevenueChart'
+import { TopMenuChart } from './TopMenuChart'
+import { CategoryPieChart } from './CategoryPieChart'
+import { HourlyOrdersChart } from './HourlyOrdersChart'
 
 // ponytail: static mock data — replace with API fetch when backend ready
 const KPI_DATA = [
@@ -36,11 +40,21 @@ const KPI_DATA = [
 
 export function DashboardPage() {
   return (
-    <div>
+    <div className="flex flex-col gap-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {KPI_DATA.map((kpi) => (
           <KpiCard key={kpi.label} {...kpi} />
         ))}
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <RevenueChart />
+        <HourlyOrdersChart />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <TopMenuChart />
+        <CategoryPieChart />
       </div>
     </div>
   )

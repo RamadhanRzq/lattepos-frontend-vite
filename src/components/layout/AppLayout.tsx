@@ -10,6 +10,8 @@ import {
   ListIcon,
   XIcon,
   SignOutIcon,
+  CaretLeftIcon,
+  CaretRightIcon,
 } from '@phosphor-icons/react'
 import { api } from '@/lib/api'
 
@@ -22,13 +24,25 @@ const NAV_ITEMS = [
   { to: '/kitchen', label: 'Dapur', icon: CookingPotIcon },
 ] as const
 
+const COLLAPSED_KEY = 'lattepos_sidebar_collapsed'
+
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [collapsed, setCollapsed] = useState(
+    () => localStorage.getItem(COLLAPSED_KEY) === '1',
+  )
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
   const matches = useMatches()
   const navigate = useNavigate()
   const currentPath = matches[matches.length - 1]?.fullPath ?? '/'
+
+  function toggleCollapsed() {
+    setCollapsed((prev) => {
+      localStorage.setItem(COLLAPSED_KEY, prev ? '0' : '1')
+      return !prev
+    })
+  }
 
   useEffect(() => {
     if (!userMenuOpen) return
@@ -43,14 +57,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   async function handleLogout() {
     const refreshToken = localStorage.getItem('refresh_token')
-  
+
     await api.post('/auth/logout', {
       refresh_token: refreshToken,
     })
-  
+
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
-  
+
     navigate({ to: '/login' })
   }
 
@@ -67,20 +81,39 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-55 flex-col border-r border-border bg-surface transition-transform md:static md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 flex flex-col border-r border-border bg-surface transition-all duration-200 md:static md:translate-x-0 ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        } ${collapsed ? 'w-16 md:w-16' : 'w-55'}`}
       >
-        {/* Logo */}
-        <div className="flex h-12 shrink-0 items-center px-4">
-          <Link to="/" className="text-[15px] font-bold tracking-[-0.01em] text-text-primary">
-            LattePOS
-          </Link>
+        {/* Logo + collapse toggle */}
+        <div className="flex h-12 shrink-0 items-center justify-between px-3">
+          {!collapsed && (
+            <Link to="/" className="px-1 text-[15px] font-bold tracking-[-0.01em] text-text-primary">
+              LattePOS
+            </Link>
+          )}
+          <button
+            type="button"
+            onClick={toggleCollapsed}
+            className="hidden size-8 items-center justify-center rounded-lg text-text-secondary hover:bg-bg hover:text-text-primary md:flex"
+            aria-label={collapsed ? 'Perluas sidebar' : 'Perkecil sidebar'}
+          >
+            {collapsed ? <CaretRightIcon size={14} weight="bold" /> : <CaretLeftIcon size={14} weight="bold" />}
+          </button>
+          {/* Mobile close */}
+          <button
+            type="button"
+            onClick={() => setMobileOpen(false)}
+            className="flex size-8 items-center justify-center rounded-lg text-text-secondary hover:bg-bg md:hidden"
+            aria-label="Tutup menu"
+          >
+            <XIcon size={16} />
+          </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-3 py-3">
-          <ul className="space-y-0.5">
+        <nav className="flex-1 overflow-y-auto px-2 py-3">
+          <ul className="flex flex-col gap-0.5">
             {NAV_ITEMS.map((item) => {
               const active = item.to === '/dashboard'
                 ? currentPath === '/dashboard'
@@ -92,14 +125,17 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     to={item.to}
                     onClick={() => setMobileOpen(false)}
                     className={`flex h-9 items-center gap-2.5 rounded-lg px-3 text-[14px] font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+                      collapsed ? 'justify-center px-0' : ''
+                    } ${
                       active
                         ? 'bg-primary/8 text-primary'
                         : 'text-text-secondary hover:bg-bg hover:text-text-primary'
                     }`}
                     aria-current={active ? 'page' : undefined}
+                    title={collapsed ? item.label : undefined}
                   >
-                    <item.icon size={16} weight={active ? 'fill' : 'regular'} />
-                    {item.label}
+                    <item.icon size={16} weight={active ? 'fill' : 'regular'} className="shrink-0" />
+                    {!collapsed && item.label}
                   </Link>
                 </li>
               )
@@ -111,15 +147,15 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Main area */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top bar */}
-        <header className="flex h-12 shrink-0 items-center border-b border-border bg-surface px-4">
+        <header className="flex h-12 shrink-0 items-center border-b border-border bg-surface px-3 md:px-4">
           {/* Mobile menu button */}
           <button
             type="button"
-            className="mr-3 flex h-9 w-9 items-center justify-center rounded-lg text-text-secondary hover:bg-bg hover:text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 md:hidden"
+            className="mr-2 flex size-9 items-center justify-center rounded-lg text-text-secondary hover:bg-bg hover:text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 md:hidden"
             onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label={mobileOpen ? 'Tutup menu' : 'Buka menu'}
+            aria-label="Buka menu"
           >
-            {mobileOpen ? <XIcon size={18} /> : <ListIcon size={18} />}
+            <ListIcon size={18} />
           </button>
 
           {/* Page title from current route */}
@@ -138,7 +174,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <button
               type="button"
               onClick={() => setUserMenuOpen(!userMenuOpen)}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-[13px] font-bold text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+              className="flex size-8 items-center justify-center rounded-full bg-primary text-[13px] font-bold text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
               aria-haspopup="true"
               aria-expanded={userMenuOpen}
             >
@@ -150,10 +186,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-[13px] text-text-secondary hover:bg-bg hover:text-red-500"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-[13px] text-text-secondary hover:bg-bg hover:text-secondary"
                 >
                   <SignOutIcon size={16} />
-                  <span className='hover:text-red-500'>Keluar</span>
+                  Keluar
                 </button>
               </div>
             )}
@@ -161,7 +197,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
+        <main className="flex-1 overflow-y-auto p-3 md:p-4 lg:p-6">
           {children}
         </main>
       </div>
