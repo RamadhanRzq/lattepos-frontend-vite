@@ -32,10 +32,11 @@ export function LoginForm() {
         password,
       })
 
-      const token = response.data.token
+      const token = response.data.access_token
 
       localStorage.setItem('access_token', token)
-      navigate({ to: '/' })
+      localStorage.setItem('refresh_token', response.data.refresh_token)
+      navigate({ to: '/dashboard' })
     } catch (err) {
       if (axios.isAxiosError(err)) {
         setError(

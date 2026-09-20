@@ -42,8 +42,15 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   }, [userMenuOpen])
 
   async function handleLogout() {
-    await api.post('/auth/logout')
+    const refreshToken = localStorage.getItem('refresh_token')
+  
+    await api.post('/auth/logout', {
+      refresh_token: refreshToken,
+    })
+  
     localStorage.removeItem('access_token')
+    localStorage.removeItem('refresh_token')
+  
     navigate({ to: '/login' })
   }
 
