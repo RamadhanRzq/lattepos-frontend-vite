@@ -13,7 +13,6 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppCategoriesRouteImport } from './routes/_app/categories'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
-import { Route as AppKitchenRouteImport } from './routes/_app/kitchen'
 import { Route as AppProductsRouteImport } from './routes/_app/products'
 import { Route as AppSalesRouteImport } from './routes/_app/sales'
 import { Route as AppStockRouteImport } from './routes/_app/stock'
@@ -37,11 +36,6 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
-const AppKitchenRoute = AppKitchenRouteImport.update({
-  id: '/kitchen',
-  path: '/kitchen',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppProductsRoute = AppProductsRouteImport.update({
   id: '/products',
   path: '/products',
@@ -63,7 +57,6 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/categories': typeof AppCategoriesRoute
   '/dashboard': typeof AppDashboardRoute
-  '/kitchen': typeof AppKitchenRoute
   '/products': typeof AppProductsRoute
   '/sales': typeof AppSalesRoute
   '/stock': typeof AppStockRoute
@@ -73,7 +66,6 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/categories': typeof AppCategoriesRoute
   '/dashboard': typeof AppDashboardRoute
-  '/kitchen': typeof AppKitchenRoute
   '/products': typeof AppProductsRoute
   '/sales': typeof AppSalesRoute
   '/stock': typeof AppStockRoute
@@ -84,7 +76,6 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_app/categories': typeof AppCategoriesRoute
   '/_app/dashboard': typeof AppDashboardRoute
-  '/_app/kitchen': typeof AppKitchenRoute
   '/_app/products': typeof AppProductsRoute
   '/_app/sales': typeof AppSalesRoute
   '/_app/stock': typeof AppStockRoute
@@ -96,7 +87,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/categories'
     | '/dashboard'
-    | '/kitchen'
     | '/products'
     | '/sales'
     | '/stock'
@@ -106,7 +96,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/categories'
     | '/dashboard'
-    | '/kitchen'
     | '/products'
     | '/sales'
     | '/stock'
@@ -116,7 +105,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/_app/categories'
     | '/_app/dashboard'
-    | '/_app/kitchen'
     | '/_app/products'
     | '/_app/sales'
     | '/_app/stock'
@@ -157,13 +145,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/kitchen': {
-      id: '/_app/kitchen'
-      path: '/kitchen'
-      fullPath: '/kitchen'
-      preLoaderRoute: typeof AppKitchenRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/products': {
       id: '/_app/products'
       path: '/products'
@@ -191,7 +172,6 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppCategoriesRoute: typeof AppCategoriesRoute
   AppDashboardRoute: typeof AppDashboardRoute
-  AppKitchenRoute: typeof AppKitchenRoute
   AppProductsRoute: typeof AppProductsRoute
   AppSalesRoute: typeof AppSalesRoute
   AppStockRoute: typeof AppStockRoute
@@ -200,7 +180,6 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppCategoriesRoute: AppCategoriesRoute,
   AppDashboardRoute: AppDashboardRoute,
-  AppKitchenRoute: AppKitchenRoute,
   AppProductsRoute: AppProductsRoute,
   AppSalesRoute: AppSalesRoute,
   AppStockRoute: AppStockRoute,

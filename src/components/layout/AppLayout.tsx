@@ -31,7 +31,6 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
     label: 'Operasional',
     items: [
       { to: '/sales', label: 'Penjualan', icon: CreditCardIcon },
-      { to: '/kitchen', label: 'Dapur', icon: CookingPotIcon },
     ],
   },
   {
