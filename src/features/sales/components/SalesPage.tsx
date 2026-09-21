@@ -254,7 +254,7 @@ export function SalesPage() {
                     >
                       <MinusIcon size={12} weight="bold" />
                     </button>
-                    <span className="min-w-[20px] text-center text-[13px] font-semibold text-text-primary">
+                    <span className="min-w-5 text-center text-[13px] font-semibold text-text-primary">
                       {item.qty}
                     </span>
                     <button
@@ -535,7 +535,7 @@ export function SalesPage() {
       {/* Recall modal */}
       {recallOpen && (
         <div
-          className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 sm:items-center"
+          className="fixed inset-0 z-60 flex items-end justify-center bg-black/40 sm:items-center"
           onClick={(e) => {
             if (e.target === e.currentTarget) setRecallOpen(false)
           }}
@@ -615,7 +615,7 @@ export function SalesPage() {
           const receipt = loadLastReceipt()
           return (
             <div
-              className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 sm:items-center"
+              className="fixed inset-0 z-60 flex items-end justify-center bg-black/40 sm:items-center"
               onClick={(e) => {
                 if (e.target === e.currentTarget) setReprintOpen(false)
               }}
