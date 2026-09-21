@@ -4,6 +4,7 @@ import { fetchMe } from '@/features/auth'
 
 export const Route = createFileRoute('/_app')({
   ssr: false,
+  staleTime: 5 * 60 * 1000,
   beforeLoad: async () => {
     if (!localStorage.getItem('access_token')) {
       throw redirect({ to: '/login' })

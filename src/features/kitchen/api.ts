@@ -16,8 +16,11 @@ const path = (orgSlug: string, storeId: string) =>
   `/org/${orgSlug}/stores/${storeId}/kitchen`
 
 export async function listQueue(orgSlug: string, storeId: string): Promise<KitchenSale[]> {
-  const { data } = await api.get<{ data: KitchenSale[] }>(`${path(orgSlug, storeId)}/queue`)
-  return data.data ?? []
+  const { data } = await api.get<{ data: KitchenSale[] }>(
+    `${path(orgSlug, storeId)}/queue`,
+  )
+
+  return data.data
 }
 
 export async function updateKitchenStatus(
@@ -26,6 +29,10 @@ export async function updateKitchenStatus(
   id: string,
   status: string,
 ): Promise<KitchenSale> {
-  const { data } = await api.patch<KitchenSale>(`${path(orgSlug, storeId)}/${id}/status`, { status })
+  const { data } = await api.patch<KitchenSale>(
+    `${path(orgSlug, storeId)}/${id}/status`,
+    { status },
+  )
+
   return data
 }
