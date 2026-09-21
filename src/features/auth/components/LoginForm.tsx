@@ -1,8 +1,8 @@
 import { SpinnerGap } from '@phosphor-icons/react'
-import axios from 'axios'
 import { useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
-import { api } from '@/lib/api'
+import { getErrorMessage } from '@/lib/api'
+import { login } from '../api'
 
 export function LoginForm() {
   const navigate = useNavigate()
@@ -28,24 +28,10 @@ export function LoginForm() {
     setLoading(true)
 
     try {
-      const response = await api.post('/login', {
-        username: username.trim(),
-        password,
-      })
-
-      const token = response.data.access_token
-
-      localStorage.setItem('access_token', token)
-      localStorage.setItem('refresh_token', response.data.refresh_token)
+      await login(username.trim(), password)
       navigate({ to: '/dashboard' })
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setError(
-          err.response?.data?.message || 'Username atau password salah.',
-        )
-      } else {
-        setError('Terjadi kesalahan saat login.')
-      }
+      setError(getErrorMessage(err, 'Username atau password salah.'))
     } finally {
       setLoading(false)
     }

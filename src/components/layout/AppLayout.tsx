@@ -10,19 +10,47 @@ import {
   ListIcon,
   XIcon,
   SignOutIcon,
-  CaretLeftIcon,
-  CaretRightIcon,
+  GearFineIcon
 } from '@phosphor-icons/react'
-import { api } from '@/lib/api'
+import { logout } from '@/features/auth'
 
-const NAV_ITEMS = [
-  { to: '/dashboard', label: 'Dashboard', icon: SquaresFourIcon },
-  { to: '/sales', label: 'Penjualan', icon: CreditCardIcon },
-  { to: '/products', label: 'Produk', icon: PackageIcon },
-  { to: '/categories', label: 'Kategori', icon: ListBulletsIcon },
-  { to: '/stock', label: 'Stok', icon: ChartBarIcon },
-  { to: '/kitchen', label: 'Dapur', icon: CookingPotIcon },
-] as const
+interface NavItem {
+  to: string
+  label: string
+  icon: typeof SquaresFourIcon
+}
+
+const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
+  {
+    label: 'Utama',
+    items: [
+      { to: '/dashboard', label: 'Dashboard', icon: SquaresFourIcon },
+    ],
+  },
+  {
+    label: 'Operasional',
+    items: [
+      { to: '/sales', label: 'Penjualan', icon: CreditCardIcon },
+      { to: '/kitchen', label: 'Dapur', icon: CookingPotIcon },
+    ],
+  },
+  {
+    label: 'Katalog',
+    items: [
+      { to: '/products', label: 'Produk', icon: PackageIcon },
+      { to: '/categories', label: 'Kategori', icon: ListBulletsIcon },
+      { to: '/stock', label: 'Stok', icon: ChartBarIcon },
+    ],
+  },
+  {
+    label: 'Pengaturan',
+    items: [
+      { to: '/settings', label: 'Pengaturan', icon: GearFineIcon },
+    ],
+  },
+]
+
+const NAV_ITEMS = NAV_GROUPS.flatMap((group) => group.items)
 
 const COLLAPSED_KEY = 'lattepos_sidebar_collapsed'
 
@@ -56,16 +84,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   }, [userMenuOpen])
 
   async function handleLogout() {
-    const refreshToken = localStorage.getItem('refresh_token')
-
-    await api.post('/auth/logout', {
-      refresh_token: refreshToken,
-    })
-
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('refresh_token')
-
-    navigate({ to: '/login' })
+    try {
+      await logout()
+    } finally {
+      navigate({ to: '/login' })
+    }
   }
 
   return (
@@ -85,26 +108,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         } ${collapsed ? 'w-16 md:w-16' : 'w-55'}`}
       >
-        {/* Logo + collapse toggle */}
-        <div className="flex h-12 shrink-0 items-center justify-between px-3">
-          {!collapsed && (
-            <Link to="/" className="px-1 text-[15px] font-bold tracking-[-0.01em] text-text-primary">
-              LattePOS
-            </Link>
-          )}
-          <button
-            type="button"
-            onClick={toggleCollapsed}
-            className="hidden size-8 items-center justify-center rounded-lg text-text-secondary hover:bg-bg hover:text-text-primary md:flex"
-            aria-label={collapsed ? 'Perluas sidebar' : 'Perkecil sidebar'}
-          >
-            {collapsed ? <CaretRightIcon size={14} weight="bold" /> : <CaretLeftIcon size={14} weight="bold" />}
-          </button>
+        {/* Logo */}
+        <div className={`flex h-12 shrink-0 items-center px-3 ${collapsed ? 'justify-center' : ''}`}>
+          <Link to="/" className="px-1 text-[15px] font-bold tracking-[-0.01em] text-text-primary">
+            {collapsed ? 'L' : 'LattePOS'}
+          </Link>
           {/* Mobile close */}
           <button
             type="button"
             onClick={() => setMobileOpen(false)}
-            className="flex size-8 items-center justify-center rounded-lg text-text-secondary hover:bg-bg md:hidden"
+            className="ml-auto flex size-8 items-center justify-center rounded-lg text-text-secondary hover:bg-bg md:hidden"
             aria-label="Tutup menu"
           >
             <XIcon size={16} />
@@ -112,35 +125,44 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-2 py-3">
-          <ul className="flex flex-col gap-0.5">
-            {NAV_ITEMS.map((item) => {
-              const active = item.to === '/dashboard'
-                ? currentPath === '/dashboard'
-                : currentPath.startsWith(item.to)
+        <nav className="flex-1 overflow-y-auto px-2 py-3" aria-label="Navigasi utama">
+          {NAV_GROUPS.map((group, groupIndex) => (
+            <div key={group.label} className={groupIndex > 0 ? (collapsed ? 'mt-2 border-t border-border pt-2' : 'mt-4') : ''}>
+              {!collapsed && (
+                <p className="px-3 pb-1 text-[11px] font-bold uppercase tracking-[0.08em] text-text-secondary/70">
+                  {group.label}
+                </p>
+              )}
+              <ul className="flex flex-col gap-0.5">
+                {group.items.map((item) => {
+                  const active = item.to === '/dashboard'
+                    ? currentPath === '/dashboard'
+                    : currentPath.startsWith(item.to)
 
-              return (
-                <li key={item.to}>
-                  <Link
-                    to={item.to}
-                    onClick={() => setMobileOpen(false)}
-                    className={`flex h-9 items-center gap-2.5 rounded-lg px-3 text-[14px] font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
-                      collapsed ? 'justify-center px-0' : ''
-                    } ${
-                      active
-                        ? 'bg-primary/8 text-primary'
-                        : 'text-text-secondary hover:bg-bg hover:text-text-primary'
-                    }`}
-                    aria-current={active ? 'page' : undefined}
-                    title={collapsed ? item.label : undefined}
-                  >
-                    <item.icon size={16} weight={active ? 'fill' : 'regular'} className="shrink-0" />
-                    {!collapsed && item.label}
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
+                  return (
+                    <li key={item.to}>
+                      <Link
+                        to={item.to}
+                        onClick={() => setMobileOpen(false)}
+                        className={`flex h-9 items-center gap-2.5 rounded-lg px-3 text-[14px] font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+                          collapsed ? 'justify-center px-0' : ''
+                        } ${
+                          active
+                            ? 'bg-primary/8 text-primary'
+                            : 'text-text-secondary hover:bg-bg hover:text-text-primary'
+                        }`}
+                        aria-current={active ? 'page' : undefined}
+                        title={collapsed ? item.label : undefined}
+                      >
+                        <item.icon size={16} weight={active ? 'fill' : 'regular'} className="shrink-0" />
+                        {!collapsed && item.label}
+                      </Link>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          ))}
         </nav>
       </aside>
 
@@ -148,7 +170,15 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top bar */}
         <header className="flex h-12 shrink-0 items-center border-b border-border bg-surface px-3 md:px-4">
-          {/* Mobile menu button */}
+          {/* Sidebar toggle — desktop: collapse, mobile: drawer */}
+          <button
+            type="button"
+            className="mr-2 hidden size-9 items-center justify-center rounded-lg text-text-secondary hover:bg-bg hover:text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 md:flex"
+            onClick={toggleCollapsed}
+            aria-label={collapsed ? 'Perluas sidebar' : 'Perkecil sidebar'}
+          >
+            <ListIcon size={18} />
+          </button>
           <button
             type="button"
             className="mr-2 flex size-9 items-center justify-center rounded-lg text-text-secondary hover:bg-bg hover:text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 md:hidden"

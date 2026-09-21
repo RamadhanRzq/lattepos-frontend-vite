@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   ListIcon,
   SquaresFourIcon,
@@ -15,36 +15,11 @@ import {
   XIcon,
   ShoppingCartIcon,
 } from '@phosphor-icons/react'
-
-// ponytail: static mock data — replace with API fetch when backend ready
-const CATEGORIES = ['Semua', 'Kopi', 'Non-Kopi', 'Makanan', 'Snack', 'Dessert']
-
-interface Product {
-  id: number
-  name: string
-  price: number
-  category: string
-  image: string
-}
-
-const PRODUCTS: Product[] = [
-  { id: 1, name: 'Es Kopi Susu', price: 22_000, category: 'Kopi', image: '☕' },
-  { id: 2, name: 'Americano', price: 20_000, category: 'Kopi', image: '☕' },
-  { id: 3, name: 'Cappuccino', price: 25_000, category: 'Kopi', image: '☕' },
-  { id: 4, name: 'Latte', price: 25_000, category: 'Kopi', image: '☕' },
-  { id: 5, name: 'Matcha Latte', price: 28_000, category: 'Non-Kopi', image: '🍵' },
-  { id: 6, name: 'Coklat Panas', price: 22_000, category: 'Non-Kopi', image: '🍫' },
-  { id: 7, name: 'Jus Jeruk', price: 18_000, category: 'Non-Kopi', image: '🍊' },
-  { id: 8, name: 'Nasi Goreng', price: 32_000, category: 'Makanan', image: '🍛' },
-  { id: 9, name: 'Mie Goreng', price: 30_000, category: 'Makanan', image: '🍜' },
-  { id: 10, name: 'Chicken Katsu', price: 35_000, category: 'Makanan', image: '🍗' },
-  { id: 11, name: 'French Fries', price: 18_000, category: 'Snack', image: '🍟' },
-  { id: 12, name: 'Roti Bakar', price: 15_000, category: 'Snack', image: '🍞' },
-  { id: 13, name: 'Croissant', price: 20_000, category: 'Snack', image: '🥐' },
-  { id: 14, name: 'Pancake', price: 25_000, category: 'Dessert', image: '🥞' },
-  { id: 15, name: 'Brownies', price: 22_000, category: 'Dessert', image: '🍫' },
-  { id: 16, name: 'Cheesecake', price: 30_000, category: 'Dessert', image: '🍰' },
-]
+import { getErrorMessage } from '@/lib/api'
+import { useOrgStore } from '@/components/layout'
+import { listCategories, type Category } from '@/features/categories/api'
+import { listProducts, type Product } from '@/features/products/api'
+import { createSale } from '../api'
 
 interface CartItem {
   product: Product
@@ -93,19 +68,42 @@ function loadLastReceipt(): LastReceipt | null {
 }
 
 export function SalesPage() {
+  const { orgs, stores, orgSlug, storeId, ready, changeOrg, changeStore } = useOrgStore()
   const [view, setView] = useState<'grid' | 'list'>('grid')
   const [category, setCategory] = useState('Semua')
   const [search, setSearch] = useState('')
+  const [products, setProducts] = useState<Product[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [paying, setPaying] = useState(false)
   const [cart, setCart] = useState<CartItem[]>([])
   const [cartOpen, setCartOpen] = useState(false)
   const [recallOpen, setRecallOpen] = useState(false)
   const [reprintOpen, setReprintOpen] = useState(false)
 
-  const filtered = PRODUCTS.filter((p) => {
-    const matchCategory = category === 'Semua' || p.category === category
+  useEffect(() => {
+    if (!ready) return
+    if (!orgSlug || !storeId) { setLoading(false); return }
+    setLoading(true)
+    setError('')
+    Promise.all([listProducts(orgSlug, storeId), listCategories(orgSlug, storeId).catch(() => [] as Category[])])
+      .then(([list, cats]) => {
+        setProducts(list.data)
+        setCategories(cats)
+      })
+      .catch((err: unknown) => setError(getErrorMessage(err, 'Gagal memuat katalog.')))
+      .finally(() => setLoading(false))
+  }, [ready, orgSlug, storeId])
+
+  const categoryNameById: Record<string, string> = Object.fromEntries(categories.map((c) => [c.id, c.name]))
+  const categoryName = (id?: string | null) => (id ? (categoryNameById[id] ?? '-') : '-')
+
+  const filtered = useMemo(() => products.filter((p) => {
+    const matchCategory = category === 'Semua' || p.category_id === category
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase())
-    return matchCategory && matchSearch
-  })
+    return matchCategory && matchSearch && p.is_active
+  }), [products, category, search])
 
   function addToCart(product: Product) {
     setCart((prev) => {
@@ -119,7 +117,7 @@ export function SalesPage() {
     })
   }
 
-  function updateQty(productId: number, delta: number) {
+  function updateQty(productId: string, delta: number) {
     setCart((prev) =>
       prev
         .map((c) =>
@@ -129,7 +127,7 @@ export function SalesPage() {
     )
   }
 
-  function removeItem(productId: number) {
+  function removeItem(productId: string) {
     setCart((prev) => prev.filter((c) => c.product.id !== productId))
   }
 
@@ -162,11 +160,24 @@ export function SalesPage() {
     setCart([])
   }
 
-  function handlePay() {
-    const receipt: LastReceipt = { items: cart, subtotal, tax, total, paidAt: Date.now() }
-    localStorage.setItem(RECEIPT_KEY, JSON.stringify(receipt))
-    setCart([])
-    alert('Pembayaran berhasil!')
+  async function handlePay() {
+    if (cart.length === 0 || !orgSlug || !storeId || paying) return
+    setPaying(true)
+    setError('')
+    try {
+      const sale = await createSale(orgSlug, storeId, {
+        payment_method: 'cash',
+        items: cart.map((c) => ({ product_id: c.product.id, quantity: c.qty })),
+      })
+      const receipt: LastReceipt = { items: cart, subtotal, tax, total: sale.grand_total, paidAt: Date.now() }
+      localStorage.setItem(RECEIPT_KEY, JSON.stringify(receipt))
+      setCart([])
+      setReprintOpen(true)
+    } catch (err) {
+      setError(getErrorMessage(err, 'Pembayaran gagal.'))
+    } finally {
+      setPaying(false)
+    }
   }
 
   const subtotal = cart.reduce((sum, c) => sum + c.product.price * c.qty, 0)
@@ -225,7 +236,7 @@ export function SalesPage() {
                 key={item.product.id}
                 className="flex items-start gap-3"
               >
-                <span className="mt-0.5 text-xl">{item.product.image}</span>
+                <span className="mt-0.5 flex size-8 items-center justify-center rounded-lg bg-primary/10 text-[13px] font-bold text-primary">{item.product.name.charAt(0).toUpperCase()}</span>
                 <div className="flex flex-1 flex-col gap-1">
                   <span className="text-[13px] font-medium text-text-primary">
                     {item.product.name}
@@ -331,11 +342,12 @@ export function SalesPage() {
           </div>
           <button
             type="button"
-            className="mt-3 flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary text-[14px] font-bold text-white transition-colors hover:bg-primary-hover"
-            onClick={handlePay}
+            disabled={paying}
+            className="mt-3 flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary text-[14px] font-bold text-white transition-colors hover:bg-primary-hover disabled:opacity-50"
+            onClick={() => void handlePay()}
           >
             <CreditCardIcon size={16} weight="bold" />
-            Bayar
+            {paying ? 'Memproses...' : 'Bayar'}
           </button>
         </div>
       )}
@@ -348,9 +360,17 @@ export function SalesPage() {
       <div className="flex min-w-0 flex-1 flex-col gap-3 lg:gap-4">
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-[20px] font-bold tracking-[-0.01em] text-text-primary lg:text-[22px]">
-            Penjualan
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-[20px] font-bold tracking-[-0.01em] text-text-primary lg:text-[22px]">
+              Penjualan
+            </h2>
+            <select value={orgSlug} onChange={(e) => void changeOrg(e.target.value)} className="h-8 rounded-lg border border-border bg-surface px-2 text-[12px] text-text-primary focus:border-primary focus:outline-none" aria-label="Organisasi">
+              {orgs.map((o) => <option key={o.id} value={o.slug}>{o.name}</option>)}
+            </select>
+            <select value={storeId} onChange={(e) => changeStore(e.target.value)} className="h-8 rounded-lg border border-border bg-surface px-2 text-[12px] text-text-primary focus:border-primary focus:outline-none" aria-label="Store">
+              {stores.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+          </div>
           <div className="flex items-center gap-2">
             {/* Search */}
             <div className="relative">
@@ -396,27 +416,31 @@ export function SalesPage() {
           </div>
         </div>
 
+        {error && <div className="rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-[13px] text-error" role="alert">{error}</div>}
         {/* Category tabs */}
         <div className="-mx-3 flex gap-2 overflow-x-auto px-3 lg:mx-0 lg:px-0">
-          {CATEGORIES.map((cat) => (
+          <button type="button" onClick={() => setCategory('Semua')} className={`shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors ${category === 'Semua' ? 'bg-primary text-white' : 'bg-surface text-text-secondary hover:bg-bg border border-border'}`}>Semua</button>
+          {categories.map((cat) => (
             <button
-              key={cat}
+              key={cat.id}
               type="button"
-              onClick={() => setCategory(cat)}
+              onClick={() => setCategory(cat.id)}
               className={`shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors ${
-                category === cat
+                category === cat.id
                   ? 'bg-primary text-white'
                   : 'bg-surface text-text-secondary hover:bg-bg border border-border'
               }`}
             >
-              {cat}
+              {cat.name}
             </button>
           ))}
         </div>
 
         {/* Product list */}
         <div className="flex-1 overflow-y-auto pb-20 lg:pb-0">
-          {filtered.length === 0 ? (
+          {loading ? (
+            <p className="py-16 text-center text-[13px] text-text-secondary">Memuat katalog...</p>
+          ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-text-secondary">
               <MagnifyingGlassIcon size={32} className="mb-2 opacity-40" />
               <p className="text-[14px]">Produk tidak ditemukan</p>
@@ -430,7 +454,7 @@ export function SalesPage() {
                   onClick={() => addToCart(p)}
                   className="flex flex-col items-center gap-1.5 rounded-xl border border-border bg-surface p-3 text-left shadow-level-1 transition-shadow hover:shadow-level-2 active:scale-[0.98] sm:gap-2 sm:p-4"
                 >
-                  <span className="text-2xl sm:text-3xl">{p.image}</span>
+                  <span className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-[15px] font-bold text-primary">{p.name.charAt(0).toUpperCase()}</span>
                   <span className="line-clamp-1 text-[12px] font-medium text-text-primary sm:text-[13px]">
                     {p.name}
                   </span>
@@ -449,13 +473,13 @@ export function SalesPage() {
                   onClick={() => addToCart(p)}
                   className="flex items-center gap-3 rounded-xl border border-border bg-surface px-3 py-2.5 shadow-level-1 transition-shadow hover:shadow-level-2 active:scale-[0.99] sm:px-4 sm:py-3"
                 >
-                  <span className="text-xl sm:text-2xl">{p.image}</span>
+                  <span className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-[13px] font-bold text-primary">{p.name.charAt(0).toUpperCase()}</span>
                   <div className="flex flex-1 flex-col text-left">
                     <span className="text-[13px] font-medium text-text-primary">
                       {p.name}
                     </span>
                     <span className="text-[12px] text-text-secondary">
-                      {p.category}
+                      {categoryName(p.category_id)}
                     </span>
                   </div>
                   <span className="text-[13px] font-bold text-primary">
