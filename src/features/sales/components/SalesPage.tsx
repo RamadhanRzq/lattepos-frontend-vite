@@ -17,8 +17,10 @@ import {
 } from '@phosphor-icons/react'
 import { getErrorMessage } from '@/lib/api'
 import { useOrgStore } from '@/components/layout'
-import { listCategories, type Category } from '@/features/categories/api'
-import { listProducts, type Product } from '@/features/products/api'
+import { listCategories } from '@/features/categories/api'
+import type { Category } from '@/features/categories/api'
+import { listProducts } from '@/features/products/api'
+import type { Product } from '@/features/products/api'
 import { createSale } from '../api'
 
 interface CartItem {
