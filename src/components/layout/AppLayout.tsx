@@ -6,7 +6,6 @@ import {
   PackageIcon,
   ListBulletsIcon,
   ChartBarIcon,
-  CookingPotIcon,
   ListIcon,
   XIcon,
   SignOutIcon,
