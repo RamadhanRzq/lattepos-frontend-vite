@@ -220,7 +220,7 @@ export function ProductsPage() {
                     Kategori
                   </th>
                   <th className="px-4 py-3 text-right text-[12px] font-medium text-text-secondary">
-                    Harga
+                    Harga Jual
                   </th>
                   <th className="px-4 py-3 text-right text-[12px] font-medium text-text-secondary">
                     Stok

@@ -212,7 +212,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Main area */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top bar */}
-        <header className="flex h-12 shrink-0 items-center border-b border-border bg-surface px-3 md:px-4">
+        <header className="flex h-14 shrink-0 items-center border-b border-border bg-surface px-3 md:px-4">
           {/* Sidebar toggle — desktop: collapse, mobile: drawer */}
           <button
             type="button"
