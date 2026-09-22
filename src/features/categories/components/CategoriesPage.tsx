@@ -18,6 +18,7 @@ export function CategoriesPage() {
   const [items, setItems] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
   const [editing, setEditing] = useState<Category | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -72,13 +73,17 @@ export function CategoriesPage() {
       toast.error('Nama kategori wajib diisi.')
       return
     }
+    if (!description.trim()) {
+      toast.error('Nama kategori wajib diisi.')
+      return
+    }
     if (!orgSlug || !storeId) return
     setSaving(true)
     try {
       const input = {
         name: name.trim(),
         slug: '',
-        description: '',
+        description: description.trim(),
         parent_id: null,
       }
       if (editing) {
@@ -218,6 +223,13 @@ export function CategoriesPage() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Nama kategori..."
+            autoFocus
+            className="h-9 rounded-lg border border-border bg-surface px-3 text-[13px] text-text-primary placeholder:text-text-secondary/50 focus:border-primary focus:outline-none"
+          />
+          <input
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Deskripsi..."
             autoFocus
             className="h-9 rounded-lg border border-border bg-surface px-3 text-[13px] text-text-primary placeholder:text-text-secondary/50 focus:border-primary focus:outline-none"
           />
