@@ -1,6 +1,7 @@
 import { SpinnerGap } from '@phosphor-icons/react'
 import { useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
+import toast from 'react-hot-toast'
 import { getErrorMessage } from '@/lib/api'
 import { login } from '../api'
 
@@ -8,20 +9,18 @@ export function LoginForm() {
   const navigate = useNavigate()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setError('')
 
     if (!username.trim()) {
-      setError('Username wajib diisi.')
+      toast.error('Username wajib diisi.')
       return
     }
 
     if (!password) {
-      setError('Password wajib diisi.')
+      toast.error('Password wajib diisi.')
       return
     }
 
@@ -29,9 +28,10 @@ export function LoginForm() {
 
     try {
       await login(username.trim(), password)
+      toast.success('Login berhasil.')
       navigate({ to: '/dashboard' })
     } catch (err) {
-      setError(getErrorMessage(err, 'Username atau password salah.'))
+      toast.error(getErrorMessage(err, 'Username atau password salah.'))
     } finally {
       setLoading(false)
     }
@@ -39,15 +39,6 @@ export function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} noValidate>
-      {error && (
-        <div
-          role="alert"
-          className="mb-4 rounded-lg border border-error/20 bg-error/5 px-3 py-2.5 text-[13px] text-error"
-        >
-          {error}
-        </div>
-      )}
-
       <div className="mb-4">
         <label
           htmlFor="username"
@@ -78,7 +69,7 @@ export function LoginForm() {
           <button
             type="button"
             className="text-[13px] font-medium text-primary hover:text-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:rounded"
-            onClick={() => alert('Fitur lupa password belum tersedia.')}
+            onClick={() => toast('Fitur lupa password belum tersedia.')}
           >
             Lupa password?
           </button>

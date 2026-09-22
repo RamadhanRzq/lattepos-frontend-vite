@@ -24,7 +24,16 @@ export interface StockList {
 const path = (orgSlug: string, storeId: string) =>
   `/org/${orgSlug}/stores/${storeId}/stock-movements`
 
-export async function listMovements(orgSlug: string, storeId: string, params?: { product_id?: string; type?: string }): Promise<StockList> {
+export async function listMovements(
+  orgSlug: string,
+  storeId: string,
+  params?: {
+    product_id?: string
+    type?: string
+    page?: number
+    limit?: number
+  },
+): Promise<StockList> {
   const { data } = await api.get<StockList>(path(orgSlug, storeId), { params })
   return data
 }

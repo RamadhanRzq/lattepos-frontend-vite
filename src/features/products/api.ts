@@ -41,21 +41,45 @@ function path(orgSlug: string, storeId: string, id = '') {
   return `/org/${orgSlug}/stores/${storeId}/products${id ? `/${id}` : ''}`
 }
 
-export async function listProducts(orgSlug: string, storeId: string, params?: { search?: string; category_id?: string }) {
-  const { data } = await api.get<ProductList>(path(orgSlug, storeId), { params })
+export async function listProducts(
+  orgSlug: string,
+  storeId: string,
+  params?: {
+    search?: string
+    category_id?: string
+    page?: number
+    limit?: number
+  },
+) {
+  const { data } = await api.get<ProductList>(path(orgSlug, storeId), {
+    params,
+  })
   return data
 }
 
-export async function createProduct(orgSlug: string, storeId: string, input: ProductInput) {
+export async function createProduct(
+  orgSlug: string,
+  storeId: string,
+  input: ProductInput,
+) {
   const { data } = await api.post<Product>(path(orgSlug, storeId), input)
   return data
 }
 
-export async function updateProduct(orgSlug: string, storeId: string, id: string, input: ProductInput) {
+export async function updateProduct(
+  orgSlug: string,
+  storeId: string,
+  id: string,
+  input: ProductInput,
+) {
   const { data } = await api.put<Product>(path(orgSlug, storeId, id), input)
   return data
 }
 
-export async function deleteProduct(orgSlug: string, storeId: string, id: string) {
+export async function deleteProduct(
+  orgSlug: string,
+  storeId: string,
+  id: string,
+) {
   await api.delete(path(orgSlug, storeId, id))
 }

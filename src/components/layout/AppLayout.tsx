@@ -9,9 +9,11 @@ import {
   ListIcon,
   XIcon,
   SignOutIcon,
-  GearFineIcon
+  GearFineIcon,
+  FilesIcon
 } from '@phosphor-icons/react'
 import { logout } from '@/features/auth'
+import { useOrgStore } from './useOrgStore'
 
 interface NavItem {
   to: string
@@ -22,14 +24,13 @@ interface NavItem {
 const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   {
     label: 'Utama',
-    items: [
-      { to: '/dashboard', label: 'Dashboard', icon: SquaresFourIcon },
-    ],
+    items: [{ to: '/dashboard', label: 'Dashboard', icon: SquaresFourIcon }],
   },
   {
     label: 'Operasional',
     items: [
       { to: '/sales', label: 'Penjualan', icon: CreditCardIcon },
+      { to: '/transactions', label: 'Transaksi', icon: FilesIcon },
     ],
   },
   {
@@ -42,9 +43,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   },
   {
     label: 'Pengaturan',
-    items: [
-      { to: '/settings', label: 'Pengaturan', icon: GearFineIcon },
-    ],
+    items: [{ to: '/settings', label: 'Pengaturan', icon: GearFineIcon }],
   },
 ]
 
@@ -52,7 +51,23 @@ const NAV_ITEMS = NAV_GROUPS.flatMap((group) => group.items)
 
 const COLLAPSED_KEY = 'lattepos_sidebar_collapsed'
 
+const DATE_FMT = new Intl.DateTimeFormat('id-ID', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+})
+const TIME_FMT = new Intl.DateTimeFormat('id-ID', {
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hour12: false,
+})
+
 export function AppLayout({ children }: { children: React.ReactNode }) {
+  const { orgs, stores, orgSlug, storeId, changeOrg, changeStore } =
+    useOrgStore()
+  const [now, setNow] = useState(() => new Date())
   const [mobileOpen, setMobileOpen] = useState(false)
   const [collapsed, setCollapsed] = useState(
     () => localStorage.getItem(COLLAPSED_KEY) === '1',
@@ -69,11 +84,19 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       return !prev
     })
   }
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000)
+    return () => clearInterval(id)
+  }, [])
+
 
   useEffect(() => {
     if (!userMenuOpen) return
     function handleClick(e: MouseEvent) {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(e.target as Node)
+      ) {
         setUserMenuOpen(false)
       }
     }
@@ -107,8 +130,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         } ${collapsed ? 'w-16 md:w-16' : 'w-55'}`}
       >
         {/* Logo */}
-        <div className={`flex h-12 shrink-0 items-center px-3 ${collapsed ? 'justify-center' : ''}`}>
-          <Link to="/" className="px-1 text-[15px] font-bold tracking-[-0.01em] text-text-primary">
+        <div
+          className={`flex h-12 shrink-0 items-center px-3 ${collapsed ? 'justify-center' : ''}`}
+        >
+          <Link
+            to="/"
+            className="px-1 text-[15px] font-bold tracking-[-0.01em] text-text-primary"
+          >
             {collapsed ? 'L' : 'LattePOS'}
           </Link>
           {/* Mobile close */}
@@ -123,9 +151,21 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-2 py-3" aria-label="Navigasi utama">
+        <nav
+          className="flex-1 overflow-y-auto px-2 py-3"
+          aria-label="Navigasi utama"
+        >
           {NAV_GROUPS.map((group, groupIndex) => (
-            <div key={group.label} className={groupIndex > 0 ? (collapsed ? 'mt-2 border-t border-border pt-2' : 'mt-4') : ''}>
+            <div
+              key={group.label}
+              className={
+                groupIndex > 0
+                  ? collapsed
+                    ? 'mt-2 border-t border-border pt-2'
+                    : 'mt-4'
+                  : ''
+              }
+            >
               {!collapsed && (
                 <p className="px-3 pb-1 text-[11px] font-bold uppercase tracking-[0.08em] text-text-secondary/70">
                   {group.label}
@@ -133,9 +173,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               )}
               <ul className="flex flex-col gap-0.5">
                 {group.items.map((item) => {
-                  const active = item.to === '/dashboard'
-                    ? currentPath === '/dashboard'
-                    : currentPath.startsWith(item.to)
+                  const active =
+                    item.to === '/dashboard'
+                      ? currentPath === '/dashboard'
+                      : currentPath.startsWith(item.to)
 
                   return (
                     <li key={item.to}>
@@ -152,7 +193,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                         aria-current={active ? 'page' : undefined}
                         title={collapsed ? item.label : undefined}
                       >
-                        <item.icon size={16} weight={active ? 'fill' : 'regular'} className="shrink-0" />
+                        <item.icon
+                          size={16}
+                          weight={active ? 'fill' : 'regular'}
+                          className="shrink-0"
+                        />
                         {!collapsed && item.label}
                       </Link>
                     </li>
@@ -194,10 +239,41 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 : currentPath.startsWith(item.to),
             )?.label ?? 'Dashboard'}
           </h1>
+          <span className="ml-3 hidden text-[12px] tabular-nums text-text-secondary lg:inline">
+            {DATE_FMT.format(now)} · {TIME_FMT.format(now)} WIB
+          </span>
 
           <div className="flex-1" />
 
-          {/* User area */}
+          {/* Org / Store switcher — single source, all pages use this */}
+          {orgs.length > 0 && (
+            <div className="mr-2 flex items-center gap-2">
+              <select
+                value={orgSlug}
+                onChange={(e) => void changeOrg(e.target.value)}
+                className="h-8 max-w-36 truncate rounded-lg border border-border bg-surface px-2 text-[12px] text-text-primary focus:border-primary focus:outline-none"
+                aria-label="Organisasi"
+              >
+                {orgs.map((o) => (
+                  <option key={o.id} value={o.slug}>
+                    {o.name}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={storeId}
+                onChange={(e) => changeStore(e.target.value)}
+                className="h-8 max-w-36 truncate rounded-lg border border-border bg-surface px-2 text-[12px] text-text-primary focus:border-primary focus:outline-none"
+                aria-label="Store"
+              >
+                {stores.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <div className="relative" ref={userMenuRef}>
             <button
               type="button"
