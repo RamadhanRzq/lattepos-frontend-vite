@@ -43,6 +43,7 @@ export function ProductsPage() {
       const list = await listProducts(orgSlug, storeId, {
         search: s || undefined,
         category_id: c || undefined,
+        product_type: 'MENU',
         page: p,
         limit: l,
       })
@@ -112,6 +113,7 @@ export function ProductsPage() {
         name: name.trim(),
         sku: sku.trim(),
         description: '',
+        product_type: 'MENU' as const,
         price: Number(price) || 0,
         stock: editing?.stock ?? 0,
         unit: editing?.unit ?? 'pcs',

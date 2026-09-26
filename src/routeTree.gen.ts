@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppCategoriesRouteImport } from './routes/_app/categories'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppProductsRouteImport } from './routes/_app/products'
+import { Route as AppRawmaterialRouteImport } from './routes/_app/rawmaterial'
 import { Route as AppSalesRouteImport } from './routes/_app/sales'
 import { Route as AppStockRouteImport } from './routes/_app/stock'
 import { Route as AppTransactionsRouteImport } from './routes/_app/transactions'
@@ -42,6 +43,11 @@ const AppProductsRoute = AppProductsRouteImport.update({
   path: '/products',
   getParentRoute: () => AppRoute,
 } as any)
+const AppRawmaterialRoute = AppRawmaterialRouteImport.update({
+  id: '/rawmaterial',
+  path: '/rawmaterial',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSalesRoute = AppSalesRouteImport.update({
   id: '/sales',
   path: '/sales',
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/categories': typeof AppCategoriesRoute
   '/dashboard': typeof AppDashboardRoute
   '/products': typeof AppProductsRoute
+  '/rawmaterial': typeof AppRawmaterialRoute
   '/sales': typeof AppSalesRoute
   '/stock': typeof AppStockRoute
   '/transactions': typeof AppTransactionsRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/categories': typeof AppCategoriesRoute
   '/dashboard': typeof AppDashboardRoute
   '/products': typeof AppProductsRoute
+  '/rawmaterial': typeof AppRawmaterialRoute
   '/sales': typeof AppSalesRoute
   '/stock': typeof AppStockRoute
   '/transactions': typeof AppTransactionsRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/_app/categories': typeof AppCategoriesRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/products': typeof AppProductsRoute
+  '/_app/rawmaterial': typeof AppRawmaterialRoute
   '/_app/sales': typeof AppSalesRoute
   '/_app/stock': typeof AppStockRoute
   '/_app/transactions': typeof AppTransactionsRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/categories'
     | '/dashboard'
     | '/products'
+    | '/rawmaterial'
     | '/sales'
     | '/stock'
     | '/transactions'
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/categories'
     | '/dashboard'
     | '/products'
+    | '/rawmaterial'
     | '/sales'
     | '/stock'
     | '/transactions'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/_app/categories'
     | '/_app/dashboard'
     | '/_app/products'
+    | '/_app/rawmaterial'
     | '/_app/sales'
     | '/_app/stock'
     | '/_app/transactions'
@@ -164,6 +176,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProductsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/rawmaterial': {
+      id: '/_app/rawmaterial'
+      path: '/rawmaterial'
+      fullPath: '/rawmaterial'
+      preLoaderRoute: typeof AppRawmaterialRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/sales': {
       id: '/_app/sales'
       path: '/sales'
@@ -192,6 +211,7 @@ interface AppRouteChildren {
   AppCategoriesRoute: typeof AppCategoriesRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppProductsRoute: typeof AppProductsRoute
+  AppRawmaterialRoute: typeof AppRawmaterialRoute
   AppSalesRoute: typeof AppSalesRoute
   AppStockRoute: typeof AppStockRoute
   AppTransactionsRoute: typeof AppTransactionsRoute
@@ -201,6 +221,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppCategoriesRoute: AppCategoriesRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppProductsRoute: AppProductsRoute,
+  AppRawmaterialRoute: AppRawmaterialRoute,
   AppSalesRoute: AppSalesRoute,
   AppStockRoute: AppStockRoute,
   AppTransactionsRoute: AppTransactionsRoute,

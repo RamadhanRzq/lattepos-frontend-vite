@@ -55,7 +55,9 @@ export function StockPage() {
           page: p,
           limit: l,
         }),
-        products.length === 0 ? listProducts(orgSlug, storeId) : null,
+        products.length === 0
+          ? listProducts(orgSlug, storeId, { limit: 100 })
+          : null,
       ])
       setItems(list.data)
       setTotal(list.total)

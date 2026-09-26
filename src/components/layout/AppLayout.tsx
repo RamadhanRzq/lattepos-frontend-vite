@@ -10,7 +10,8 @@ import {
   XIcon,
   SignOutIcon,
   GearFineIcon,
-  FilesIcon
+  FilesIcon,
+  CubeIcon
 } from '@phosphor-icons/react'
 import { logout } from '@/features/auth'
 import { useOrgStore } from './useOrgStore'
@@ -37,6 +38,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
     label: 'Katalog',
     items: [
       { to: '/products', label: 'Produk', icon: PackageIcon },
+      { to: '/rawmaterial', label: 'Bahan Baku', icon: CubeIcon },
       { to: '/categories', label: 'Kategori', icon: ListBulletsIcon },
       { to: '/stock', label: 'Stok', icon: ChartBarIcon },
     ],

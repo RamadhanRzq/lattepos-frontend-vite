@@ -94,7 +94,7 @@ export function SalesPage() {
     }
     setLoading(true)
     Promise.all([
-      listProducts(orgSlug, storeId),
+      listProducts(orgSlug, storeId, { product_type: 'MENU', limit: 100 }),
       listCategories(orgSlug, storeId).catch(() => [] as Category[]),
     ])
       .then(([list, cats]) => {

@@ -7,6 +7,7 @@ export interface Product {
   name: string
   sku: string
   description?: string
+  product_type: ProductType
   price: number
   stock: number
   unit: string
@@ -17,6 +18,8 @@ export interface Product {
   created_at: string
   updated_at: string
 }
+
+export type ProductType = 'MENU' | 'RAW_MATERIAL' | 'PACKAGING' | 'OTHER'
 
 export interface ProductList {
   data: Product[]
@@ -29,6 +32,7 @@ export interface ProductInput {
   name: string
   sku: string
   description: string
+  product_type: ProductType
   price: number
   stock: number
   unit: string
@@ -47,6 +51,7 @@ export async function listProducts(
   params?: {
     search?: string
     category_id?: string
+    product_type?: ProductType
     page?: number
     limit?: number
   },
