@@ -5,6 +5,7 @@ import { useOrgStore } from '@/components/layout'
 import { ConfirmDialog, Modal, PageLoading, Pagination } from '@/components/ui'
 import { listCategories } from '@/features/categories/api'
 import type { Category } from '@/features/categories/api'
+import { RecipeEditor } from '@/features/recipes'
 import {
   createProduct,
   deleteProduct,
@@ -32,6 +33,7 @@ export function ProductsPage() {
   const [saving, setSaving] = useState(false)
   const [pendingDelete, setPendingDelete] = useState<Product | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [recipeFor, setRecipeFor] = useState<Product | null>(null)
 
   const categoryById: Record<string, string> = Object.fromEntries(
     categories.map((c) => [c.id, c.name]),
@@ -277,6 +279,13 @@ export function ProductsPage() {
                       <div className="flex justify-end gap-2">
                         <button
                           type="button"
+                          onClick={() => setRecipeFor(p)}
+                          className="text-[12px] font-medium text-text-secondary hover:underline"
+                        >
+                          Resep
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => openEdit(p)}
                           className="text-[12px] font-medium text-primary hover:underline"
                         >
@@ -365,6 +374,13 @@ export function ProductsPage() {
           </div>
         </form>
       </Modal>
+      <RecipeEditor
+        open={recipeFor !== null}
+        orgSlug={orgSlug}
+        storeId={storeId}
+        product={recipeFor}
+        onClose={() => setRecipeFor(null)}
+      />
       <ConfirmDialog
         open={pendingDelete !== null}
         title="Hapus Produk"
