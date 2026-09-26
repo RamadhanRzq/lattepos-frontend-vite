@@ -73,10 +73,6 @@ export function CategoriesPage() {
       toast.error('Nama kategori wajib diisi.')
       return
     }
-    if (!description.trim()) {
-      toast.error('Nama kategori wajib diisi.')
-      return
-    }
     if (!orgSlug || !storeId) return
     setSaving(true)
     try {
