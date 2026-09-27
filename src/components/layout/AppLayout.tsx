@@ -11,7 +11,8 @@ import {
   SignOutIcon,
   GearFineIcon,
   FilesIcon,
-  CubeIcon
+  CubeIcon,
+  ArmchairIcon,
 } from '@phosphor-icons/react'
 import { logout } from '@/features/auth'
 import { useOrgStore } from './useOrgStore'
@@ -32,6 +33,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
     items: [
       { to: '/sales', label: 'Penjualan', icon: CreditCardIcon },
       { to: '/transactions', label: 'Transaksi', icon: FilesIcon },
+      { to: '/tables', label: 'Meja', icon: ArmchairIcon },
     ],
   },
   {
@@ -90,7 +92,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     const id = setInterval(() => setNow(new Date()), 1000)
     return () => clearInterval(id)
   }, [])
-
 
   useEffect(() => {
     if (!userMenuOpen) return

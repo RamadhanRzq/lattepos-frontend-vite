@@ -17,6 +17,7 @@ import { Route as AppProductsRouteImport } from './routes/_app/products'
 import { Route as AppRawmaterialRouteImport } from './routes/_app/rawmaterial'
 import { Route as AppSalesRouteImport } from './routes/_app/sales'
 import { Route as AppStockRouteImport } from './routes/_app/stock'
+import { Route as AppTablesRouteImport } from './routes/_app/tables'
 import { Route as AppTransactionsRouteImport } from './routes/_app/transactions'
 
 const AppRoute = AppRouteImport.update({
@@ -58,6 +59,11 @@ const AppStockRoute = AppStockRouteImport.update({
   path: '/stock',
   getParentRoute: () => AppRoute,
 } as any)
+const AppTablesRoute = AppTablesRouteImport.update({
+  id: '/tables',
+  path: '/tables',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppTransactionsRoute = AppTransactionsRouteImport.update({
   id: '/transactions',
   path: '/transactions',
@@ -73,6 +79,7 @@ export interface FileRoutesByFullPath {
   '/rawmaterial': typeof AppRawmaterialRoute
   '/sales': typeof AppSalesRoute
   '/stock': typeof AppStockRoute
+  '/tables': typeof AppTablesRoute
   '/transactions': typeof AppTransactionsRoute
 }
 export interface FileRoutesByTo {
@@ -84,6 +91,7 @@ export interface FileRoutesByTo {
   '/rawmaterial': typeof AppRawmaterialRoute
   '/sales': typeof AppSalesRoute
   '/stock': typeof AppStockRoute
+  '/tables': typeof AppTablesRoute
   '/transactions': typeof AppTransactionsRoute
 }
 export interface FileRoutesById {
@@ -96,6 +104,7 @@ export interface FileRoutesById {
   '/_app/rawmaterial': typeof AppRawmaterialRoute
   '/_app/sales': typeof AppSalesRoute
   '/_app/stock': typeof AppStockRoute
+  '/_app/tables': typeof AppTablesRoute
   '/_app/transactions': typeof AppTransactionsRoute
 }
 export interface FileRouteTypes {
@@ -109,6 +118,7 @@ export interface FileRouteTypes {
     | '/rawmaterial'
     | '/sales'
     | '/stock'
+    | '/tables'
     | '/transactions'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -120,6 +130,7 @@ export interface FileRouteTypes {
     | '/rawmaterial'
     | '/sales'
     | '/stock'
+    | '/tables'
     | '/transactions'
   id:
     | '__root__'
@@ -131,6 +142,7 @@ export interface FileRouteTypes {
     | '/_app/rawmaterial'
     | '/_app/sales'
     | '/_app/stock'
+    | '/_app/tables'
     | '/_app/transactions'
   fileRoutesById: FileRoutesById
 }
@@ -197,6 +209,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppStockRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/tables': {
+      id: '/_app/tables'
+      path: '/tables'
+      fullPath: '/tables'
+      preLoaderRoute: typeof AppTablesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/transactions': {
       id: '/_app/transactions'
       path: '/transactions'
@@ -214,6 +233,7 @@ interface AppRouteChildren {
   AppRawmaterialRoute: typeof AppRawmaterialRoute
   AppSalesRoute: typeof AppSalesRoute
   AppStockRoute: typeof AppStockRoute
+  AppTablesRoute: typeof AppTablesRoute
   AppTransactionsRoute: typeof AppTransactionsRoute
 }
 
@@ -224,6 +244,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppRawmaterialRoute: AppRawmaterialRoute,
   AppSalesRoute: AppSalesRoute,
   AppStockRoute: AppStockRoute,
+  AppTablesRoute: AppTablesRoute,
   AppTransactionsRoute: AppTransactionsRoute,
 }
 
